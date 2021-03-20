@@ -1,1 +1,2 @@
-用于返回爬取漫画信息的后端,基于flask
+爬取mangabz.com漫画的一个简单爬虫 
+该项目为后端 基于flask+sqlachemy
