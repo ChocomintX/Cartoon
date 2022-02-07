@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, SignatureExpired, BadSignature
 import mangaUtils
+import searchUtils
 import json
 
 app = Flask(__name__)
@@ -21,7 +22,7 @@ SECRET_KEY = 'Chocomint'
 # 创建对象的基类:
 Base = declarative_base()
 # 初始化数据库连接:
-engine = create_engine('mysql+mysqlconnector://root:root@localhost:3306/Cartoon')
+engine = create_engine('mysql+mysqlconnector://root:pps55663255@localhost:3306/Cartoon')
 # 创建DBSession类型:
 DBSession = sessionmaker(bind=engine)
 
@@ -91,6 +92,60 @@ class History(Base):
 def hello_world():
     return 'hello!'
 
+@app.route('/searchJS')
+def searchJS():
+    return '''
+        let mbody = document.getElementsByTagName('body')[0];
+        let maingroup = document.createElement('div');
+        maingroup.align = 'center';
+        maingroup.style.position = 'fixed';
+        maingroup.style.left = '0';
+        // maingroup.style.right = '0';
+        maingroup.style.top = '50px';
+        maingroup.style.margin = 'auto';
+        maingroup.style.width = '200px';
+        maingroup.style.height = '100px';
+        // maingroup.style.background = 'black';
+        
+        let question = document.createElement('input');
+        question.id='mySearchText'
+        
+    
+        let search = document.createElement('button');
+        search.innerText='确定';
+        search.onclick=()=>{
+            // alert($("#mySearchText").val())
+            $.get("http://localhost:5000/searchQuestion?q="+$("#mySearchText").val(),
+             function(data) {
+                alert(data)
+            });
+        }
+    
+        let show=true;
+        let showBtn=document.createElement('button');
+        showBtn.style.height='20px';
+        showBtn.onclick=()=>{
+            show=!show;
+            if(show){
+                question.style.display='none';
+                search.style.display='none';
+            }else{
+                question.style.display='inline';
+                search.style.display='inline';
+            }
+        }
+        maingroup.appendChild(question);
+        maingroup.appendChild(search);
+        maingroup.appendChild(showBtn);
+        mbody.appendChild(maingroup);
+    '''
+
+@app.route('/searchQuestion', methods=['GET', 'POST'])
+def searchQuestion():
+    q = request.args.get('q')
+    print(q)
+    return searchUtils.search(q)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -127,7 +182,7 @@ def register():
         results['code'] = ERROR_CODE
         results['message'] = '用户名已存在！'
     else:
-        user = User(username=username,name=name, password=password)
+        user = User(username=username, name=name, password=password)
         session.add(user)
         session.commit()
         results['code'] = SUCCESS_CODE

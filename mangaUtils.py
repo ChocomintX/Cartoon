@@ -78,7 +78,7 @@ def get_chapterImages(bookID, chapterID):
 
     urlNum = '1'
     spare = re.search(',\'[0-9].*?jpg', html).group().split('|')
-    if spare is not None and len(spare) > 4 and spare[len(spare) - 3].isdigit() and int(spare[len(spare) - 3])<50:
+    if spare is not None and len(spare) > 4 and spare[len(spare) - 3].isdigit() and int(spare[len(spare) - 3]) < 50:
         urlNum = spare[len(spare) - 3]
     else:
         urlNum = re.search('[0-9]\\.[0-9]\\.[0-9]/[0-9]*/', html).group()
@@ -87,8 +87,15 @@ def get_chapterImages(bookID, chapterID):
     imgsList = re.findall('[0-9]+?_[0-9]+', html)
     imgsList.sort(key=lambda x: int(str(x).split('_')[0]))
 
+    type = '.jpg'
+
+    if len(imgsList) > 0:
+        checkImg = requests.get(imgServer + '{0}/{1}/{2}/'.format(urlNum, bookID, chapterID) + imgsList[0] + type)
+        if checkImg.status_code == 404:
+            type = '.png'
+
     for img in imgsList:
-        img_url = imgServer + '{0}/{1}/{2}/'.format(urlNum, bookID, chapterID) + img + '.jpg'
+        img_url = imgServer + '{0}/{1}/{2}/'.format(urlNum, bookID, chapterID) + img + type
         images.append(img_url)
 
     results['imgs'] = images
@@ -96,4 +103,4 @@ def get_chapterImages(bookID, chapterID):
 
 
 if __name__ == '__main__':
-    print(get_chapterImages('12818','147738'))
+    print(get_chapterImages('12818', '147738'))
